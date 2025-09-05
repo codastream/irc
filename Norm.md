@@ -7,6 +7,7 @@
 	- fix
 	- feat
 	- meta for anything like .gitignore, Readme, charts, ..
+	- org when basically moving content to another file
 	- bug if committed with a known bug (should be avoided in commit history, can be used on local repository then squashed during interactive rebase)
 
 ## Header files

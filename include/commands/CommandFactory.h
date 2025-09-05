@@ -3,6 +3,7 @@
 
 #include "ACommand.h"
 #include "PassCommand.h"
+#include "NickCommand.h"
 
 #include <iostream>
 #include <string>

@@ -20,8 +20,8 @@ CommandFactory::~CommandFactory(void) {}
 // TODO
 ACommand* CommandFactory::create(std::string& command_name)
 {
-	if (command_name == "PASS")
-		return new PassCommand();
+	if (command_name == "NICK")
+		return new NickCommand();
 	return NULL;
 }
 

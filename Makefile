@@ -20,21 +20,23 @@ INCLUDE_DIR		:=	include
 BUILD_DIR		:=	.build
 
 SRCS_FILES		:= 	main.cc\
-					ACommand.cc\
+					commands/CommandFactory.cc\
+					commands/ACommand.cc\
+					commands/NickCommand.cc\
+					commands/PassCommand.cc\
 					Client.cc\
-					CommandFactory.cc\
 					IRCException.cc\
 					Message.cc\
-					PassCommand.cc\
 					Server.cc\
-					User.cc
+					User.cc\
+					utils.cc\
 
 EXT				:= .cc
 # SRCSEXT			:= $(addsuffix $(EXT), $(SRCS_FILES))
 SRCS			:= $(addprefix $(SRC_DIR)/, $(SRCS_FILES))
 
 OBJS			:=	${SRCS:$(SRC_DIR)/%.cc=$(BUILD_DIR)/%.o}
-INC				:=	-I $(INCLUDE_DIR)
+INC				:=	-I $(INCLUDE_DIR) -I $(INCLUDE_DIR)/commands
 HEADERS			:=	$(wildcard $(INCLUDE_DIR)/*.h)
 DIRS			:=	$(sort $(shell dirname $(OBJS)))
 
@@ -60,7 +62,7 @@ $(DIRS):
 
 $(NAME): $(OBJS)
 	@echo "\n$(GREEN)Create binaries$(NOC)"
-	@$(CXX) $(OBJS) $(INC) -o $@
+	@$(CXX) $(OBJS) -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc | $(DIRS)
 	@mkdir -p $(BUILD_DIR)

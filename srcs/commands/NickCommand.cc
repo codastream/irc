@@ -1,35 +1,34 @@
-#include "ACommand.h"
+#include "NickCommand.h"
 
 namespace Irc {
 /************************************************************
-*	🥚 CONSTRUCTORS & DESTRUCTOR							*
+*		🥚 CONSTRUCTORS & DESTRUCTOR						*
 ************************************************************/
-ACommand::ACommand() {}
 
-ACommand::ACommand(const ACommand& other) {
-	(void) other;
-}
+NickCommand::NickCommand(void) {}
 
-ACommand::~ACommand(void) {}
+NickCommand::NickCommand(std::vector<std::string> args) : ACommand(args) {}
+
+NickCommand::~NickCommand(void) {}
 
 /************************************************************
-*	➕ OPERATORS												*
+*		➕ OPERATORS											*
 ************************************************************/
 
-ACommand& ACommand::operator=(const ACommand& inst) 
+/*************************************************************
+*		🛠️ FUNCTIONS											*
+*************************************************************/
+
+void NickCommand::execute(Server& s, Client& c, Message& m)
 {
-	if (this != &inst)
-	{
-	}
-	return (*this);
+	(void) s;
+	(void) c;
+	(void) m;
+	std::cout << "Execution" << std::endl;
 }
 
 /*************************************************************
-*	🛠️ FUNCTIONS												*
-*************************************************************/
-
-/*************************************************************
-*	👁️‍ GETTERS and SETTERS						 			*
+*		👁️‍ GETTERS and SETTERS				 				*
 *************************************************************/
 
 }

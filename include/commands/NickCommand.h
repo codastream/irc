@@ -1,0 +1,26 @@
+#ifndef NICKCOMMAND_H
+#define NICKCOMMAND_H
+
+#include "ACommand.h"
+
+#include <iostream>
+#include <string>
+
+namespace Irc {
+
+class NickCommand : public ACommand {
+	public:
+		NickCommand();
+		NickCommand(std::vector<std::string> args);
+		~NickCommand();
+		NickCommand& operator=(const NickCommand& other);
+
+		void execute(Server& s, Client& c, Message& m);
+
+	private:
+
+};
+
+}
+
+#endif

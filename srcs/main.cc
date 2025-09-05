@@ -1,56 +1,47 @@
 #include "Server.h"
+#include "colors.h"
+#include "utils.h"
 
-int main()
+#include <iostream>
+
+namespace Irc {
+
+	bool	check_args(int ac, char** av, int* port, unsigned int* hashed)
+	{
+		if (ac != 3)
+		{
+			std::cerr << RED << "usage: irc <port> <password>" << NC << std::endl;
+			return false;
+		}
+		if (!check_port(av[1], port))
+			return false;
+		if (!check_password(av[2], hashed))
+			return false;
+		return true;
+	}
+
+
+}
+
+int main(int ac, char** av)
 {
-	Irc::Server* s = Irc::Server::get_instance();
+	int				port;
+	unsigned int	hashed;
+	if (!Irc::check_args(ac, av, &port, &hashed))
+		return EXIT_FAILURE;
+	Irc::Server* s = Irc::Server::get_instance(port, hashed);
 	signal(SIGINT, Irc::Server::handle_interrupt);
+	signal(SIGTSTP, Irc::Server::handle_interrupt);
+	
 	try
 	{
 		s->start();
+		s->loop();
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
+		return EXIT_FAILURE;
 	}
-	
-	epoll_event*	events = s->get_events();
-	while (s->can_serve())
-	{
-		int n = epoll_wait(s->get_epoll_fd(), events, Irc::Server::QUEUE_SIZE, -1);
-		if (n == -1)
-		{
-			s->stop();
-		}
-		for (int i = 0; i < n; ++i)
-		{
-			if (events[i].data.fd == s->get_server_fd())
-			{
-				int client_fd = accept(s->get_server_fd(), NULL, NULL);
-				Irc::Server::set_non_blocking(client_fd);
-				s->subscribe_to_event(client_fd, EPOLLIN | EPOLLET);
-			}
-			else
-			{
-				char readBuf[512];
-				errno = 0;
-				ssize_t len = recv(events[i].data.fd, readBuf, sizeof(readBuf), 0);
-				if (len == -1)
-				{
-					std::cerr << "rcv error" << std::endl;
-					close(events[i].data.fd);
-				}
-				else if (len == 0)
-				{
-					std::cout << "EOF" << std::endl;
-					close(events[i].data.fd);
-				}
-				else
-				{
-					readBuf[len] = '\0';
-					std::cout << "msg: " << readBuf << std::endl;
-				}
-			}
-		}
-	}
-
+	return EXIT_SUCCESS;
 }
