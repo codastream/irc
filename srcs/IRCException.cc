@@ -2,29 +2,31 @@
 
 namespace Irc {
 
-/************************************************************
-*			🥚 CONSTRUCTORS & DESTRUCTOR					*
-************************************************************/
+	/************************************************************
+	*			🥚 CONSTRUCTORS & DESTRUCTOR					*
+	************************************************************/
 
-IRCException::IRCException(const std::string& msg) : message_(msg) {}
+	IRCException::IRCException(ReplyCode code, const std::string& msg) : message_(msg), code_(code) {}
+	IRCException::IRCException(ReplyCode code) : message_(""), code_(code) {}
 
-IRCException::~IRCException(void) throw() {}
+	IRCException::~IRCException(void) throw() {}
 
-/************************************************************
-*			➕ OPERATORS										*
-************************************************************/
+	/************************************************************
+	*			➕ OPERATORS										*
+	************************************************************/
 
-/*************************************************************
-*			🛠️ FUNCTIONS										*
-*************************************************************/
+	/*************************************************************
+	*			🛠️ FUNCTIONS										*
+	*************************************************************/
 
-const char* IRCException::what() const throw()
-{
-	return message_.c_str();
-}
+	ReplyCode IRCException::getCode()
+	{
+		return code_;
+	}
 
-/*************************************************************
-*			👁️‍ GETTERS and SETTERS				 			*
-*************************************************************/
+	const char* IRCException::what() const throw()
+	{
+		return message_.c_str();
+	}
 
 }

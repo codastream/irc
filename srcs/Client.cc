@@ -1,36 +1,54 @@
 #include "Client.h"
 
 namespace Irc {
-/************************************************************
-*		🥚 CONSTRUCTORS & DESTRUCTOR				*
-************************************************************/
 
-Client::Client(void) : client_fd_(-1), client_buffer_(NULL) {}
+	/************************************************************
+	*		🥚 CONSTRUCTORS & DESTRUCTOR				*
+	************************************************************/
 
-Client::Client(const Client& inst) : client_fd_(inst.client_fd_), client_buffer_(inst.client_buffer_) {}
+	Client::Client(void) : client_fd_(-1), status_(UNAUTHENTICATED) {}
 
-Client::~Client(void) {}
+	Client::Client(int fd) : client_fd_(fd), status_(UNAUTHENTICATED) {}
 
-/************************************************************
-*		➕ OPERATORS									*
-************************************************************/
+	Client::Client(const Client& inst) : client_fd_(inst.client_fd_), status_(inst.status_) {}
 
-Client& Client::operator=(const Client& inst) 
-{
-	if (this != &inst)
+	Client::~Client(void) {}
+
+	/************************************************************
+	*		➕ OPERATORS									*
+	************************************************************/
+
+	Client& Client::operator=(const Client& inst) 
 	{
-		client_fd_ = inst.client_fd_;
-		client_buffer_ = inst.client_buffer_;
+		if (this != &inst)
+		{
+			client_fd_ = inst.client_fd_;
+			status_ = inst.status_;
+		}
+		return (*this);
 	}
-	return (*this);
-}
 
-/*************************************************************
-*		🛠️ FUNCTIONS								*
-*************************************************************/
+	/*************************************************************
+	*		🛠️ FUNCTIONS								*
+	*************************************************************/
 
-/*************************************************************
-*		👁️‍ GETTERS and SETTERS				 			*
-*************************************************************/
+	/*************************************************************
+	*		👁️‍ GETTERS and SETTERS				 			*
+	*************************************************************/
+
+	ClientStatus Client::get_status() const
+	{
+		return status_;
+	}
+
+	void	Client::set_status(ClientStatus status)
+	{
+		status_ = status;
+	}
+
+	std::string Client::get_nick() const
+	{
+		return nickname_;
+	}
 
 }

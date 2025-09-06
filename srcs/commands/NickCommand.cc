@@ -1,34 +1,30 @@
 #include "NickCommand.h"
 
 namespace Irc {
-/************************************************************
-*		🥚 CONSTRUCTORS & DESTRUCTOR						*
-************************************************************/
 
-NickCommand::NickCommand(void) {}
+	/************************************************************
+	*		🥚 CONSTRUCTORS & DESTRUCTOR						*
+	************************************************************/
 
-NickCommand::NickCommand(std::vector<std::string> args) : ACommand(args) {}
+	NickCommand::NickCommand(void) {}
 
-NickCommand::~NickCommand(void) {}
+	NickCommand::NickCommand(std::vector<std::string> args) : ACommand(args) {}
 
-/************************************************************
-*		➕ OPERATORS											*
-************************************************************/
+	NickCommand::~NickCommand(void) {}
 
-/*************************************************************
-*		🛠️ FUNCTIONS											*
-*************************************************************/
+	/************************************************************
+	*		➕ OPERATORS											*
+	************************************************************/
 
-void NickCommand::execute(Server& s, Client& c, Message& m)
-{
-	(void) s;
-	(void) c;
-	(void) m;
-	std::cout << "Execution" << std::endl;
-}
+	/*************************************************************
+	*		🛠️ FUNCTIONS											*
+	*************************************************************/
 
-/*************************************************************
-*		👁️‍ GETTERS and SETTERS				 				*
-*************************************************************/
+	void NickCommand::execute(Server& s, ClientConnection& co)
+	{
+		(void) s;
+		(void) co;
+		std::cout << "Execution" << std::endl;
+	}
 
 }

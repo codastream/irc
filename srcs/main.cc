@@ -27,6 +27,7 @@ int main(int ac, char** av)
 {
 	int				port;
 	unsigned int	hashed;
+
 	if (!Irc::check_args(ac, av, &port, &hashed))
 		return EXIT_FAILURE;
 	Irc::Server* s = Irc::Server::get_instance(port, hashed);

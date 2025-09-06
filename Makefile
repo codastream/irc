@@ -1,5 +1,7 @@
 include colors.mk
 
+export PATH := $(HOME)/local/bin:$(PATH)
+
 NAME			:=	irc
 
 CXX				:=	clang++
@@ -25,10 +27,11 @@ SRCS_FILES		:= 	main.cc\
 					commands/NickCommand.cc\
 					commands/PassCommand.cc\
 					Client.cc\
+					ClientConnection.cc\
+					CommandParser.cc\
 					IRCException.cc\
-					Message.cc\
+					ReplyFactory.cc\
 					Server.cc\
-					User.cc\
 					utils.cc\
 
 EXT				:= .cc
@@ -85,9 +88,9 @@ debug: clean all
 
 lint:
 	@echo "$(YELLOW)Running static analysis$(NOC)"
-	@cppcheck --enable=all --std=c++98 $(SRC_DIR)/
+	@cppcheck --enable=all -I include -I srcs --std=c++98 $(SRC_DIR)
 
-format-check:
+format:
 	@echo "$(YELLOW)Checking code format$(NOC)"
 	@clang-format --dry-run --Werror $(FILES_TO_FORMAT)
 

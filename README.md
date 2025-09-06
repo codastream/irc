@@ -128,6 +128,14 @@ lsof -i :6667
 netstat -tnp | grep 6667
 ```
 
+## Checking an existing server output
+
+```bash
+/raw DEBUG ON
+/quote PROTOCTL 
+/quote MONITOR + *
+```
+
 ## Using an irc client
 
 - once IRC protocol responses are implemented

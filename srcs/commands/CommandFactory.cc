@@ -1,32 +1,33 @@
 #include "CommandFactory.h"
 
 namespace Irc {
-/************************************************************
-*		🥚 CONSTRUCTORS & DESTRUCTOR						*
-************************************************************/
 
-CommandFactory::CommandFactory(void) {}
+	/************************************************************
+	*		🥚 CONSTRUCTORS & DESTRUCTOR						*
+	************************************************************/
 
-CommandFactory::~CommandFactory(void) {}
+	CommandFactory::CommandFactory(void) {}
 
-/************************************************************
-*		➕ OPERATORS											*
-************************************************************/
+	CommandFactory::~CommandFactory(void) {}
 
-/*************************************************************
-*		🛠️ FUNCTIONS											*
-*************************************************************/
+	/************************************************************
+	*		➕ OPERATORS											*
+	************************************************************/
 
-// TODO
-ACommand* CommandFactory::create(std::string& command_name)
-{
-	if (command_name == "NICK")
-		return new NickCommand();
-	return NULL;
-}
+	/*************************************************************
+	*		🛠️ FUNCTIONS											*
+	*************************************************************/
 
-/*************************************************************
-*		👁️‍ GETTERS and SETTERS				 				*
-*************************************************************/
+	// TODO
+	ACommand* CommandFactory::create(std::string& command_name, std::vector<std::string> params)
+	{
+		ACommand* cmd = NULL;
+		if (command_name == "PASS")
+			cmd = new PassCommand(params);
+		else if (command_name == "NICK")
+			cmd = new NickCommand(params);
+		return cmd;
+	}
+
 
 }

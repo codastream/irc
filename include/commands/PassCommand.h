@@ -2,23 +2,25 @@
 #define PASSCOMMAND_H
 
 #include "ACommand.h"
+#include "Server.h"
 
-#include <iostream>
 #include <string>
+#include <vector>
 
 namespace Irc {
 
-class PassCommand : public ACommand {
-	public:
-		PassCommand();
-		~PassCommand();
-		PassCommand& operator=(const PassCommand& other);
+	class PassCommand : public ACommand {
+		public:
+			PassCommand();
+			PassCommand(std::vector<std::string> args);
+			~PassCommand();
+			PassCommand& operator=(const PassCommand& other);
 
-		void execute(Server& s, Client& c, Message& m);
+			void execute(Server& s, ClientConnection& co);
 
-	private:
+		private:
 
-};
+	};
 
 }
 
