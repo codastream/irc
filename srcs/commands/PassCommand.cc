@@ -6,7 +6,11 @@ namespace Irc {
 ************************************************************/
 
 PassCommand::PassCommand(void) : ACommand() {}
-PassCommand::PassCommand(std::vector<std::string> args) : ACommand(args) {}
+PassCommand::PassCommand(std::vector<std::string> args) : ACommand(args) 
+{
+	std::cout << "new Path command with args" << std::endl;
+}
+
 PassCommand::~PassCommand(void) {}
 
 /************************************************************
@@ -23,7 +27,7 @@ void PassCommand::execute(Server& s, ClientConnection& co)
 
 	if (args_.size() < 1)
 	{
-		co.add_reply(rf.make_reply(ERR_NEEDMOREPARAMS, "PASS", "Not enough parameters"));
+		co.queue_reply(rf.make_reply(ERR_NEEDMOREPARAMS, "PASS", "Not enough parameters"));
 		return ;
 	}
 	if (args_.size() > 1)
@@ -33,15 +37,16 @@ void PassCommand::execute(Server& s, ClientConnection& co)
 	Client c = s.get_client_by_fd(co.get_fd());
 	if (c.get_status() == REGISTERED)
 	{
-		co.add_reply(rf.make_reply(ERR_ALREADYREGISTERED, c.get_nick(), "Unauthorized command (already registered)"));
+		co.queue_reply(rf.make_reply(ERR_ALREADYREGISTERED, c.get_nick(), "Unauthorized command (already registered)"));
 		return ;
 	}
 	if (!s.is_valid_password(args_[0]))
 	{
-		co.add_reply(rf.make_reply(ERR_PASSWDMISMATCH, "*", "Password incorrect"));
+		co.queue_reply(rf.make_reply(ERR_PASSWDMISMATCH, "*", "Password incorrect"));
 		return ;
 	}
 	c.set_status(AUTHENTICATED);
+	std::cout << "end of execute\n";
 }
 
 /*************************************************************

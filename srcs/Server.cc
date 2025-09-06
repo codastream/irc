@@ -56,6 +56,14 @@ namespace Irc {
 		epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, fd, &ev);
 	}
 
+	void	Server::modify_event_(int fd, uint32_t events)
+	{
+		epoll_event ev;
+		ev.events = events;
+		ev.data.fd = fd;
+		epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, fd, &ev);
+	}
+
 	void	Server::handle_interrupt(int sig)
 	{
 		if (sig == SIGINT || sig == SIGTSTP)
@@ -63,6 +71,7 @@ namespace Irc {
 			if (DEBUG)
 				std::cout << "handle interrupt" << std::endl;
 			Server::can_serve_ = false;
+			delete Server::get_instance();
 		}
 	}
 
@@ -106,39 +115,52 @@ namespace Irc {
 				if (events_[i].data.fd == this->get_server_fd())
 				{
 					int client_fd = accept(this->get_server_fd(), NULL, NULL);
-					// Client* c = new Client(client_fd);
+					if (client_fd == -1)
+						throw IRCException(SERVER_ERR, "accept error");
+					Client* c = new Client(client_fd);
 					ClientConnection* co = new ClientConnection(client_fd);
-					// clients_.insert(std::make_pair(client_fd, c));
+					clients_.insert(std::make_pair(client_fd, c));
 					client_connections_.insert(std::make_pair(client_fd, co));
 					Server::set_non_blocking(client_fd);
 					this->subscribe_to_event_(client_fd, EPOLLIN | EPOLLET);
 				}
-				
-				int client_fd = events_[i].data.fd;
-				ClientConnection* co = client_connections_.at(client_fd);
-
-				if (events_[i].events & EPOLLIN)
+				else
 				{
-					if (!co->receive())
-					{
-						close(client_fd);
-						client_connections_.erase(client_fd);
-						continue ;
-					}
-					ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
-					cmd->execute(*this, *co);
-				}
+					int client_fd = events_[i].data.fd;
+					ClientConnection* co = client_connections_.at(client_fd); // TODO check that clientConnection exists
 
-				if (events_[i].events & EPOLLOUT)
-				{
-					if (!co->send_pending())
+					if (events_[i].events & EPOLLIN)
 					{
-						close(client_fd);
-						client_connections_.erase(client_fd);
-						continue ;
+						if (!co->receive())
+						{
+							close(client_fd);
+							client_connections_.erase(client_fd);
+							continue ;
+						}
+						ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
+						if (cmd)
+						{
+							cmd->execute(*this, *co);
+							delete cmd;
+						}
+						if (co->has_pending_write())
+							this->modify_event_(client_fd, EPOLLIN | EPOLLOUT);
+					}
+
+					if (events_[i].events & EPOLLOUT)
+					{
+						if (!co->send_queue())
+						{
+							close(client_fd);
+							client_connections_.erase(client_fd);
+							continue ;
+						}
+						if (!co->has_pending_write())
+    						this->modify_event_(client_fd, EPOLLIN | EPOLLET);
 					}
 				}
-			}
+			}	
+
 		}
 	}
 
@@ -166,10 +188,6 @@ namespace Irc {
 
 	Server*	Server::get_instance()
 	{
-		if (!Server::instance_)
-		{
-			return new Server(DEFAULT_PORT, 0);
-		}
 		return instance_;
 	}
 

@@ -20,10 +20,9 @@ namespace Irc {
 	*		🛠️ FUNCTIONS										*
 	*************************************************************/
 
-	void		ClientConnection::add_reply(const std::string& msg)
+	void		ClientConnection::queue_reply(const std::string& msg)
 	{
 		write_buffer_ += msg;
-		has_pending_write_ = true;
 	}
 	// TODO check if better to return exception on failed read and send
 	/// @brief fills read buffer
@@ -53,22 +52,20 @@ namespace Irc {
 
 	/// @brief empties the write buffer into client fd
 	/// @throw exception if fd not properly closed
-	bool		ClientConnection::send_pending()
+	bool		ClientConnection::send_queue()
 	{
 		while (!write_buffer_.empty())
 		{
 			errno = 0;
-			ssize_t nb_sent = send(fd_, write_buffer_.c_str(), write_buffer_.size(), 0);
-			if (nb_sent > 0)
-				write_buffer_.erase(0, nb_sent);
-			else
+			ssize_t nb_sent = send(fd_, write_buffer_.c_str(), write_buffer_.size(), 0);	
+			if (nb_sent == -1)
 			{
 				if (errno == EAGAIN || errno == EWOULDBLOCK) // saturated socket
-					break ;
+					return true;
 				throw IRCException(SERVER_ERR);
 			}
+			write_buffer_.erase(0, nb_sent);
 		}
-		has_pending_write_ = !write_buffer_.empty();
 		return true;
 	}
 
@@ -88,7 +85,7 @@ namespace Irc {
 
 	bool		ClientConnection::has_pending_write() const
 	{
-		return has_pending_write_;
+		return !write_buffer_.empty();
 	}
 
 	int			ClientConnection::get_fd() const

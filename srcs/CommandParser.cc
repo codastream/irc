@@ -38,8 +38,8 @@ namespace Irc {
 		std::string	token;
 		ACommand*	cmd;
 
-		if (!check_format(s))
-			throw IRCException(FORMAT_ERR, "should end with \\r\\n");
+		// if (!check_format(s))
+		// 	throw IRCException(FORMAT_ERR, "should end with \\r\\n");
 		std::istringstream iss(s);
 		if (!(iss >> msg.command_name))
 			throw IRCException(FORMAT_ERR, "should start with command name");

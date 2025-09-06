@@ -72,6 +72,7 @@ namespace Irc {
 			Server(int port, unsigned int hashed_password);
 
 			void			subscribe_to_event_(int fd, uint32_t events);
+			void			modify_event_(int fd, uint32_t events);
 
 	};
 }

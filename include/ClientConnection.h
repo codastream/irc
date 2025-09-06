@@ -24,9 +24,9 @@ namespace Irc {
 			std::string	get_write_buffer() const;
 			int			get_fd() const;
 			bool		has_pending_write() const;
-			void		add_reply(const std::string& msg);
+			void		queue_reply(const std::string& msg);
 			bool		receive();
-			bool		send_pending();
+			bool		send_queue();
 
 		private:
 			int			fd_;
