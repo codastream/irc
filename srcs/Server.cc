@@ -12,11 +12,8 @@ namespace Irc {
 	*				🥚 CONSTRUCTORS & DESTRUCTOR				*
 	************************************************************/
 
-	// Server::Server(void) : \
-	// 	port_(DEFAULT_PORT), hashed_password_(0), events_(new epoll_event[QUEUE_SIZE]), host_name_("server"), clients_(), client_connections_(), reply_factory_(host_name_) {}
-
 	Server::Server(int port, unsigned int hashed_password) : \
-		port_(port), hashed_password_(hashed_password), events_(new epoll_event[QUEUE_SIZE]), host_name_("server"), clients_(), client_connections_(), reply_factory_(host_name_) {
+		port_(port), hashed_password_(hashed_password), events_(new epoll_event[QUEUE_SIZE]), clients_(), clients_by_nick_(), client_connections_(), reply_factory_(HOST_NAME) {
 
 			instance_ = this;
 	}
@@ -25,6 +22,7 @@ namespace Irc {
 	{
 		delete[] events_;
 		Utils::delete_map(clients_);
+		clients_by_nick_.clear();
 		Utils::delete_map(client_connections_, true);
 	}
 
@@ -176,6 +174,7 @@ namespace Irc {
 	void	Server::stop()
 	{
 		Server::can_serve_ = false;
+		delete Server::instance_;
 	}
 
 	bool	Server::is_valid_password(const std::string& test) const
@@ -183,12 +182,25 @@ namespace Irc {
 		return (simple_hash(test) == hashed_password_);
 	}
 
-	Client&		Server::get_client_by_fd(int client_fd)
+	Client*		Server::get_client_by_fd(int client_fd)
 	{
 		std::map<int, Client*>::iterator it = clients_.find(client_fd);
-		if (it == clients_.end())
-			throw std::runtime_error("client not found");
-		return *(it->second);
+		if (it != clients_.end())
+			return it->second;
+		return NULL;
+	}
+
+	Client*		Server::get_client_by_nick(const std::string& nick)
+	{
+		std::map<std::string, Client*>::iterator it = clients_by_nick_.find(nick);
+		if (it != clients_by_nick_.end())
+			return it->second;
+		return NULL;
+	}	
+
+	void	Server::update_client_by_nick(Client* client)
+	{
+		clients_by_nick_[client->get_nick()] = client;
 	}
 
 	/*************************************************************

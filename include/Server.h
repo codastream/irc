@@ -7,6 +7,10 @@
 #include "IRCException.h"
 #include "ReplyFactory.h"
 
+#include "Logger.h"
+#include "utils.h"
+#include "config.h"
+
 #include <iostream>
 #include <string>
 #include <map>
@@ -20,12 +24,10 @@
 #include <errno.h>					// is it allowed ?
 #include <unistd.h>					// close
 
-#include "Logger.h"
-#include "utils.h"
-
 #define DEBUG 0
 
 namespace Irc {
+
 	class Server {
 		public:
 			~Server();
@@ -40,8 +42,10 @@ namespace Irc {
 			static void		handle_interrupt(int sig);
 			static int		set_non_blocking(int fd);
 			static bool		can_serve();
-			Client&			get_client_by_fd(int client_fd);
-			Client&			get_client_by_nick(const std::string& nick);
+		
+			Client*			get_client_by_fd(int client_fd);
+			Client*			get_client_by_nick(const std::string& nick);
+			void			update_client_by_nick(Client* client);
 			
 			ReplyFactory&	get_reply_factory();
 			int				get_port() const;
@@ -64,8 +68,8 @@ namespace Irc {
 			int									server_fd_;
 			int									epoll_fd_;
 			epoll_event*						events_;
-			std::string							host_name_;
 			std::map<int, Client*> 				clients_;
+			std::map<std::string, Client*> 		clients_by_nick_;
 			std::map<int, ClientConnection*> 	client_connections_;
 			ReplyFactory						reply_factory_;
 

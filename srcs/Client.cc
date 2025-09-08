@@ -36,6 +36,11 @@ namespace Irc {
 	*		👁️‍ GETTERS and SETTERS				 			*
 	*************************************************************/
 
+	int	Client::get_fd() const
+	{
+		return client_fd_;
+	}
+
 	ClientStatus Client::get_status() const
 	{
 		return status_;
@@ -49,6 +54,11 @@ namespace Irc {
 	std::string Client::get_nick() const
 	{
 		return nickname_;
+	}
+
+	void Client::set_nick(const std::string& nick)
+	{
+		nickname_ = nick;
 	}
 
 }

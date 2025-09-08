@@ -8,7 +8,8 @@ namespace Irc {
 	*		🥚 CONSTRUCTORS & DESTRUCTOR						*
 	************************************************************/
 
-	ClientConnection::ClientConnection(int client_fd) : fd_(client_fd), read_buffer_(), write_buffer_(), has_pending_write_(false) {}
+	ClientConnection::ClientConnection(int client_fd) : fd_(client_fd), read_buffer_(), \
+		write_buffer_(), has_pending_write_(false), rf_(HOST_NAME) {}
 
 	ClientConnection::~ClientConnection(void) {}
 
@@ -69,9 +70,50 @@ namespace Irc {
 		return true;
 	}
 
+	void	ClientConnection::queue_err_needmoreparams(const std::string& cmd_name)
+	{
+		std::string msg = rf_.make_reply(ERR_NEEDMOREPARAMS, cmd_name, "Not enough parameters");
+		queue_reply(msg);
+	}
+
+	void	ClientConnection::queue_err_alreadyregistered(const std::string& nick)
+	{
+		std::string msg = rf_.make_reply(ERR_ALREADYREGISTERED, nick, "Unauthorized command (already registered)");
+		queue_reply(msg);
+	}
+
+	void	ClientConnection::queue_err_passwdmismatch()
+	{
+		std::string msg = rf_.make_reply(ERR_PASSWDMISMATCH, "*", "Password incorrect");
+		queue_reply(msg);
+	}
+
+	void	ClientConnection::queue_err_nonicknamegiven()
+	{
+		std::string msg = rf_.make_reply(ERR_NONICKNAMEGIVEN, "*", "No nickname given");
+		queue_reply(msg);
+	}
+
+	void	ClientConnection::queue_err_erroneusnickname(const std::string& nick)
+	{
+		std::string msg = rf_.make_reply(ERR_ERRONEUSNICKNAME, nick, "Erroneous nickname");
+		queue_reply(msg);
+	}
+
+	void	ClientConnection::queue_err_nicknameinuse(const std::string& nick)
+	{
+		std::string msg = rf_.make_reply(ERR_NICKNAMEINUSE, nick, "Nickname is already in use");
+		queue_reply(msg);
+	}
+
 	/*************************************************************
 	*		👁️‍ GETTERS and SETTERS				 				*
 	*************************************************************/
+
+	// ReplyFactory& ClientConnection::get_reply_factory() const
+	// {
+	// 	return rf_;
+	// }
 
 	std::string	ClientConnection::get_read_buffer() const
 	{

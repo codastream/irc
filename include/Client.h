@@ -20,9 +20,11 @@ namespace Irc {
 			Client(const Client& other);
 			Client& operator=(const Client& other);
 
+			int				get_fd() const;
 			ClientStatus	get_status() const;
 			void			set_status(ClientStatus status);
 			std::string		get_nick() const;
+			void			set_nick(const std::string& nick);
 			bool			is_active() const;
 
 		private:

@@ -20,30 +20,28 @@ PassCommand::~PassCommand(void) {}
 
 void PassCommand::execute(Server& s, ClientConnection& co)
 {
-	ReplyFactory& rf = s.get_reply_factory();
-
 	if (args_.size() < 1)
 	{
-		co.queue_reply(rf.make_reply(ERR_NEEDMOREPARAMS, "PASS", "Not enough parameters"));
+		co.queue_err_needmoreparams("PASS");
 		return ;
 	}
-	if (args_.size() > 1)
+	std::string&	password = args_[0];
+	Client* 		c = s.get_client_by_fd(co.get_fd());
+	if (!c)
 	{
-		throw IRCException(FORMAT_ERR);
+		Logger::error(std::string("client not found for fd ") + Utils::str(co.get_fd()));
+		throw std::runtime_error("client not found for fd");
 	}
-	Client c = s.get_client_by_fd(co.get_fd());
-	if (c.get_status() == REGISTERED)
+	if (c->get_status() == REGISTERED)
 	{
-		co.queue_reply(rf.make_reply(ERR_ALREADYREGISTERED, c.get_nick(), "Unauthorized command (already registered)"));
+		co.queue_err_alreadyregistered(c->get_nick());
+	}
+	if (!s.is_valid_password(password))
+	{
+		co.queue_err_passwdmismatch();
 		return ;
 	}
-	if (!s.is_valid_password(args_[0]))
-	{
-		co.queue_reply(rf.make_reply(ERR_PASSWDMISMATCH, "*", "Password incorrect"));
-		return ;
-	}
-	c.set_status(AUTHENTICATED);
-	std::cout << "end of execute\n";
+	c->set_status(AUTHENTICATED);
 }
 
 /*************************************************************
