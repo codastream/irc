@@ -1,16 +1,17 @@
 #ifndef COLORS_H
 #define COLORS_H
 
-#define NC			"\033[0m"
-#define RED			"\033[31m"
-#define BLUE		"\033[34m"
-#define CYAN		"\033[36m"
-#define BLACK		"\033[30m"
-#define ORANGE		"\033[33m"
-#define WHITE		"\033[37m"
-#define GREEN		"\033[32m"
-#define YELLOW		"\033[33m"
-#define MAGENTA		"\e[35m" 
+#define NC			"\e[0m"
+#define RED			"\e[31m"
+#define BLUE		"\e[34m"
+#define CYAN		"\e[36m"
+#define BLACK		"\e[30m"
+#define ORANGE		"\e[33m"
+#define WHITE		"\e[37m"
+#define GREEN		"\e[32m"
+#define YELLOW		"\e[33m"
+#define MAGENTA		"\e[35m"
+#define GREY		"\e[38;5;250"
 
 #define YELLOWBACK	"\e[43m"
 #define REDBACK		"\e[101m"

@@ -6,10 +6,7 @@ namespace Irc {
 ************************************************************/
 
 PassCommand::PassCommand(void) : ACommand() {}
-PassCommand::PassCommand(std::vector<std::string> args) : ACommand(args) 
-{
-	std::cout << "new Path command with args" << std::endl;
-}
+PassCommand::PassCommand(std::vector<std::string> args) : ACommand(args) {}
 
 PassCommand::~PassCommand(void) {}
 

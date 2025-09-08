@@ -30,13 +30,14 @@ SRCS_FILES		:= 	main.cc\
 					ClientConnection.cc\
 					CommandParser.cc\
 					IRCException.cc\
+					Logger.cc\
 					ReplyFactory.cc\
 					Server.cc\
 					utils.cc\
 
 EXT				:= .cc
 # SRCSEXT			:= $(addsuffix $(EXT), $(SRCS_FILES))
-SRCS			:= $(addprefix $(SRC_DIR)/, $(SRCS_FILES))
+SRCS			:=	$(addprefix $(SRC_DIR)/, $(SRCS_FILES))
 
 OBJS			:=	${SRCS:$(SRC_DIR)/%.cc=$(BUILD_DIR)/%.o}
 INC				:=	-I $(INCLUDE_DIR) -I $(INCLUDE_DIR)/commands
@@ -44,6 +45,8 @@ HEADERS			:=	$(wildcard $(INCLUDE_DIR)/*.h)
 DIRS			:=	$(sort $(shell dirname $(OBJS)))
 
 FILES_TO_FORMAT	:=	$(SRCS) $(HEADERS)
+
+LOGFILE			:=	irc.log
 
 #================== Loader vars
 NB_COMP	:=	1
@@ -97,6 +100,7 @@ format:
 fclean: clean
 	@echo "$(RED)Remove binary$(NOC)"
 	@rm -f $(NAME)
+	@rm -f $(LOGFILE)
 
 re: fclean
 	@make

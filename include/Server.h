@@ -20,6 +20,7 @@
 #include <errno.h>					// is it allowed ?
 #include <unistd.h>					// close
 
+#include "Logger.h"
 #include "utils.h"
 
 #define DEBUG 0

@@ -38,7 +38,7 @@ namespace Irc {
 
 	/// @brief 
 	/// @param fd 
-	/// @throw exception if fcntl fails
+	/// @throw exception if error in fcntl
 	/// @return 
 	int	Server::set_non_blocking(int fd)
 	{
@@ -68,8 +68,7 @@ namespace Irc {
 	{
 		if (sig == SIGINT || sig == SIGTSTP)
 		{
-			if (DEBUG)
-				std::cout << "handle interrupt" << std::endl;
+			Logger::debug("handle interrupting signal");
 			Server::can_serve_ = false;
 			delete Server::get_instance();
 		}
@@ -104,12 +103,14 @@ namespace Irc {
 		return server_fd_;
 	}
 
+	/// @brief 
+	/// @throw IRCException if error from accept
 	void	Server::loop()
 	{
 		while (Server::can_serve())
 		{
 			int n = epoll_wait(this->get_epoll_fd(), events_, Server::QUEUE_SIZE, -1);
-			std::cout << "nb of events " << n << std::endl;
+			Logger::debug(std::string("nb of events: ") + Utils::str(n));
 
 			if (n == -1)
 			{
@@ -138,7 +139,7 @@ namespace Irc {
 					{
 						if (!co->receive())
 						{
-							std::cout << "error receive on fd " << co->get_fd() << std::endl;
+							Logger::error(std::string("receive error on fd " + Utils::str(co->get_fd())));
 							close(client_fd);
 							client_connections_.erase(client_fd);
 							continue ;
@@ -151,14 +152,12 @@ namespace Irc {
 						}
 						if (co->has_pending_write())
 						{
-							std::cout << "pending write on fd " << co->get_fd() << std::endl;
 							this->modify_event_(client_fd, EPOLLIN | EPOLLOUT);
 						}
 					}
 
 					if (events_[i].events & EPOLLOUT)
 					{
-						std::cout << "something to read on " << co->get_fd() << std::endl;
 						if (!co->send_queue())
 						{
 							close(client_fd);
