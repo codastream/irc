@@ -22,6 +22,7 @@ namespace Irc {
 
 	void		ClientConnection::queue_reply(const std::string& msg)
 	{
+		std::cout << "adding " << msg << " to write buffer" << std::endl;
 		write_buffer_ += msg;
 	}
 	// TODO check if better to return exception on failed read and send
@@ -58,6 +59,7 @@ namespace Irc {
 		{
 			errno = 0;
 			ssize_t nb_sent = send(fd_, write_buffer_.c_str(), write_buffer_.size(), 0);	
+			std::cout << "sending " << write_buffer_ << std::endl;
 			if (nb_sent == -1)
 			{
 				if (errno == EAGAIN || errno == EWOULDBLOCK) // saturated socket
@@ -85,6 +87,7 @@ namespace Irc {
 
 	bool		ClientConnection::has_pending_write() const
 	{
+		std::cout << "write buffer: " << write_buffer_ << std::endl;
 		return !write_buffer_.empty();
 	}
 

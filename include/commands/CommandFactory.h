@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 
+#include "PassCommand.h"
+#include "NickCommand.h"
+
 namespace Irc {
 
 	class ACommand;

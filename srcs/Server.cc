@@ -83,6 +83,9 @@ namespace Irc {
 		server_fd_ = socket(AF_INET6, SOCK_STREAM, 0);
 		if (server_fd_ == -1)
 			throw IRCException(SERVER_ERR, "socket init error");
+		fcntl(server_fd_, F_SETFL, O_NONBLOCK);
+		int yes=1;
+		setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 		sockaddr_in6 addr;
 		std::memset(&addr, 0, sizeof(addr));
 		addr.sin6_family = AF_INET6;
@@ -106,6 +109,8 @@ namespace Irc {
 		while (Server::can_serve())
 		{
 			int n = epoll_wait(this->get_epoll_fd(), events_, Server::QUEUE_SIZE, -1);
+			std::cout << "nb of events " << n << std::endl;
+
 			if (n == -1)
 			{
 				this->stop();
@@ -133,6 +138,7 @@ namespace Irc {
 					{
 						if (!co->receive())
 						{
+							std::cout << "error receive on fd " << co->get_fd() << std::endl;
 							close(client_fd);
 							client_connections_.erase(client_fd);
 							continue ;
@@ -144,11 +150,15 @@ namespace Irc {
 							delete cmd;
 						}
 						if (co->has_pending_write())
+						{
+							std::cout << "pending write on fd " << co->get_fd() << std::endl;
 							this->modify_event_(client_fd, EPOLLIN | EPOLLOUT);
+						}
 					}
 
 					if (events_[i].events & EPOLLOUT)
 					{
+						std::cout << "something to read on " << co->get_fd() << std::endl;
 						if (!co->send_queue())
 						{
 							close(client_fd);
