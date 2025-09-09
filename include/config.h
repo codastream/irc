@@ -4,7 +4,7 @@
 #include <string>
 
 namespace Irc {
-	const std::string	HOST_NAME = "cri";
+	const std::string	HOST_NAME = "localhost";
 }
 
 #endif

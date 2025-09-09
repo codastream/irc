@@ -2,12 +2,13 @@
 #define LOGGER_H
 
 #include "colors.h"
+#include "reply_codes.h"
+#include "IRCException.h"
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <string>
-// #include <pthread.h>
 #include <ctime>
 
 enum LogLevel {
@@ -25,6 +26,7 @@ class Logger {
 		static void	debug(const std::string& msg);
 		static void	info(const std::string& msg);
 		static void	error(const std::string& msg);
+		static void ex(const std::string& msg, Irc::ReplyCode code);
 
 	private:
 		static const char*			LOG_FILENAME;

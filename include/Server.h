@@ -17,7 +17,9 @@
 #include <algorithm>
 #include <cstring>					// memset
 #include <sys/socket.h>
+#include <sys/types.h>				
 #include <sys/epoll.h>
+#include <netdb.h>					// adrrinfo
 #include <netinet/in.h>				// sockaddr_in6
 #include <signal.h>
 #include <fcntl.h>

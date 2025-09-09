@@ -77,25 +77,49 @@ namespace Irc {
 	/// @return socket fd
 	int		Server::start()
 	{
-		server_fd_ = socket(AF_INET6, SOCK_STREAM, 0);
-		if (server_fd_ == -1)
-			throw IRCException(SERVER_ERR, "socket init error");
-		fcntl(server_fd_, F_SETFL, O_NONBLOCK);
-		int yes=1;
-		setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
-		sockaddr_in6 addr;
-		std::memset(&addr, 0, sizeof(addr));
-		addr.sin6_family = AF_INET6;
-		addr.sin6_port = htons(Server::DEFAULT_PORT);
-		addr.sin6_addr = in6addr_any;
-		if (bind(server_fd_, (sockaddr*)&addr, sizeof(addr)) == -1)
-			throw IRCException(SERVER_ERR, "bind error");
+		std::string port_str = Utils::str(port_);
+		struct addrinfo hints = {};
+		struct addrinfo* result = NULL;
+		std::memset(&hints, 0, sizeof(hints));
+		hints.ai_family = AF_UNSPEC;
+		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_flags = AI_PASSIVE;
+
+		// resolve localhost::port
+		int status = getaddrinfo(HOST_NAME.c_str(), port_str.c_str(), &hints, &result);
+		if (status != 0)
+		{
+			Logger::error("getaddrinfo error");
+			throw IRCException(SERVER_ERR, "addrinfo error");
+		}
+		int server_fd = -1;
+		for (struct  addrinfo* test = result; test != NULL; test = test->ai_next)
+		{
+			server_fd = socket(test->ai_family, test->ai_socktype, test->ai_protocol);
+			if (server_fd == -1)
+				continue;
+			fcntl(server_fd_, F_SETFL, O_NONBLOCK);
+			int yes=1;
+			setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+			if (bind(server_fd_, test->ai_addr, test->ai_addrlen) == 0)
+				break;
+			close(server_fd_);
+			server_fd = -1;
+		};
+		freeaddrinfo(result);
+
 		if (listen(server_fd_, SOMAXCONN) == -1)
+		{
+			close(server_fd);
 			throw IRCException(SERVER_ERR, "listen error");
+		}
 
 		epoll_fd_ = epoll_create1(0);
 		if (epoll_fd_ == -1)
+		{
+			close(server_fd);
 			throw IRCException(SERVER_ERR, "epoll create error");
+		}
 		subscribe_to_event_(server_fd_, EPOLLIN);
 		Server::can_serve_ = true;
 		return server_fd_;

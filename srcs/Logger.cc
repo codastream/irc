@@ -87,6 +87,12 @@ void	Logger::error(const std::string& msg)
 	Logger::get_instance_().log_(ERROR, msg);
 }
 
+void Logger::ex(const std::string& msg, Irc::ReplyCode code)
+{
+	Logger::get_instance_().log_(ERROR, msg);
+	throw Irc::IRCException(code, msg);
+}
+
 /*************************************************************
 *		👁️‍ GETTERS and SETTERS				 				*
 *************************************************************/
