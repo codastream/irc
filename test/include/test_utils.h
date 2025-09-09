@@ -1,6 +1,8 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include "test_list.h"
+
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -46,9 +48,6 @@ struct CoutRedirect {
 	std::string str() const { return buffer.str(); }
 };
 
-#include "test.tpp"
-
-
-
+#include "test_utils.tpp"
 
 #endif

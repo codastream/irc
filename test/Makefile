@@ -8,35 +8,45 @@ CXX				:=	clang++
 
 CXXFLAGS		:=	-Wall -Wextra -Werror -std=c++20
 
+MAKEFLAGS		:=	--no-print-directory
+
+IRC_DIR			:=	../srcs
+IRC_INCLUDE_DIR	:=	../include
+
 SRC_DIR			:=	srcs
 INCLUDE_DIR		:=	include
-IRC_INCLUDE_DIR	:=	../include
 BUILD_DIR		:=	.build
+
+INC				:= 	-I$(INCLUDE_DIR) -I$(IRC_INCLUDE_DIR)
 
 SRCS_FILES		:= 	test.cc\
 					testPassCommand.cc\
 					ReplyAssert.cc\
 					ServerRunner.cc\
 
+IRC_SRCS_FILES	:=	commands/CommandFactory.cc\
+					commands/ACommand.cc\
+					commands/NickCommand.cc\
+					commands/PassCommand.cc\
+					Client.cc\
+					ClientConnection.cc\
+					CommandParser.cc\
+					IRCException.cc\
+					Logger.cc\
+					ReplyFactory.cc\
+					Server.cc\
+					utils.cc\
+
 EXT				:= .cc
 
-SRCS			:=	$(addprefix $(SRC_DIR)/, $(SRCS_FILES))
+TEST_SRCS		:=	$(addprefix $(SRC_DIR)/, $(SRCS_FILES))
+IRC_SRCS 		:=	$(addprefix $(IRC_DIR)/, $(IRC_SRCS_FILES))
+SRCS			:=	$(TEST_SRCS) $(IRC_SRCS)
 
-OBJS			:=	${SRCS:$(SRC_DIR)/%.cc=$(BUILD_DIR)/%.o}
-INC				:=	-I $(INCLUDE_DIR) -I$(IRC_INCLUDE_DIR) -I $(IRC_INCLUDE_DIR)/commands
-HEADERS			:=	$(wildcard $(INCLUDE_DIR)/*.h)
+OBJS			:=	$(patsubst %.cc,$(BUILD_DIR)/%.o,$(notdir $(SRCS)))
 DIRS			:=	$(sort $(shell dirname $(OBJS)))
 
-#================== Loader vars
-NB_COMP	:=	1
-
-ifndef RECURSION
-TO_COMP :=	$(shell make RECURSION=1 -n | grep Compiling | wc -l)
-else
-TO_COMP	:=	1
-endif
-
-PERCENT	:= 0
+vpath %.cc $(SRC_DIR) $(IRC_DIR) $(IRC_DIR)/commands
 
 #================== Targets
 
@@ -49,17 +59,9 @@ $(NAME): $(OBJS)
 	@echo "\n$(GREEN)Create binaries$(NOC)"
 	@$(CXX) $(OBJS) -o $@
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cc | $(DIRS)
+$(BUILD_DIR)/%.o: %.cc | $(DIRS)
 	@mkdir -p $(BUILD_DIR)
-	@if [ $(NB_COMP) -eq 1 ]; then echo "$(BOLD)Compilation of source files :$(NOC)";fi
-	$(eval PERCENT=$(shell if [ $(TO_COMP) -eq 0 ]; then echo 100; else expr $(NB_COMP)00 "/" $(TO_COMP); fi))
-	@if [ $(PERCENT) -le 30 ]; then echo -n "$(RED)"; elif [ $(PERCENT) -le 66 ]; then echo -n "$(YELLOW)"; elif [ $(PERCENT) -gt 66 ]; then echo -n "$(GREEN)"; fi
-	@echo -n "\r"; for i in $$(seq 1 $$(/usr/bin/tput cols)); do echo -n " "; done
-	@echo -n "\r"; for i in $$(seq 1 25); do if [ $$(expr $$i "*" 4) -le $(PERCENT) ]; then echo -n "█"; else echo -n " "; fi; done; echo -n "";
-	@printf " $(NB_COMP)/$(TO_COMP) - Compiling $<"
-	@echo -n "$(NOC)"
 	@$(CXX) $(CXXFLAGS) $(INC) $< -c -o $@
-	$(eval NB_COMP=$(shell expr $(NB_COMP) + 1))
 
 clean:
 	@echo "$(RED)Remove objects$(NOC)"

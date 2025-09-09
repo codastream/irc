@@ -8,6 +8,11 @@ ServerRunner::ServerRunner(Irc::Server& server) : server_(server), running_(fals
 
 ServerRunner::~ServerRunner(void) 
 {
+	if (thread_.joinable())
+	{
+		server_.stop();
+		thread_.join();
+	}
 	stop();
 }
 

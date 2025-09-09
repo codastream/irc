@@ -1,4 +1,4 @@
-#include "test.h"
+#include "test_utils.h"
 
 template <typename Exception, typename Func>
 bool assert_throws(Func&& f)
@@ -14,7 +14,7 @@ bool assert_throws(Func&& f)
 }
 
 template <typename Func>
-void run_test(Func&& f, const char* name)
+void run_test(Func&& f, const char* file, const char* name)
 {
 	try {
 		f();

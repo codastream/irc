@@ -1,7 +1,4 @@
-#include "ServerRunner.h"
-#include "ReplyAssert.h"
-#include "reply_codes.h"
-#include "test.h"
+#include "test_utils.h"
 
 void	noPasswordShouldError(Irc::Server* server)
 {

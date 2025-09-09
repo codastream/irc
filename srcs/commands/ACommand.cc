@@ -1,4 +1,4 @@
-#include "ACommand.h"
+#include "commands/ACommand.h"
 
 namespace Irc {
 /************************************************************

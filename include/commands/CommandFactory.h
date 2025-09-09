@@ -1,12 +1,12 @@
 #ifndef COMMANDFACTORY_H
 #define COMMANDFACTORY_H
 
+#include "commands/PassCommand.h"
+#include "commands/NickCommand.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "PassCommand.h"
-#include "NickCommand.h"
 
 namespace Irc {
 

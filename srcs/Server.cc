@@ -22,7 +22,6 @@ namespace Irc {
 	{
 		delete[] events_;
 		Utils::delete_map(clients_);
-		clients_by_nick_.clear();
 		Utils::delete_map(client_connections_, true);
 	}
 
@@ -85,13 +84,15 @@ namespace Irc {
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
 
-		// resolve localhost::port
+		Logger::debug(std::string("port = ") + port_str);
 		int status = getaddrinfo(HOST_NAME.c_str(), port_str.c_str(), &hints, &result);
 		if (status != 0)
 		{
 			Logger::error("getaddrinfo error");
 			throw IRCException(SERVER_ERR, "addrinfo error");
 		}
+		Logger::debug(std::string("addr1 = ") + Utils::str(result->ai_addr));
+
 		int server_fd = -1;
 		for (struct  addrinfo* test = result; test != NULL; test = test->ai_next)
 		{
@@ -99,7 +100,7 @@ namespace Irc {
 			if (server_fd == -1)
 				continue;
 			fcntl(server_fd_, F_SETFL, O_NONBLOCK);
-			int yes=1;
+			int yes = 1;
 			setsockopt(server_fd_, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
 			if (bind(server_fd_, test->ai_addr, test->ai_addrlen) == 0)
 				break;
@@ -198,6 +199,11 @@ namespace Irc {
 	void	Server::stop()
 	{
 		Server::can_serve_ = false;
+		if (server_fd_ != -1)
+		{
+			close(server_fd_);
+			server_fd_ = -1;
+		}
 		delete Server::instance_;
 	}
 

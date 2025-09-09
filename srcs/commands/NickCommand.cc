@@ -1,4 +1,4 @@
-#include "NickCommand.h"
+#include "commands/NickCommand.h"
 
 namespace Irc {
 

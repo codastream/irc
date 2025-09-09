@@ -59,7 +59,7 @@ void	Logger::log_(LogLevel level, const std::string& msg)
 	tm = localtime(&rawtime);
 	strftime(time_str, sizeof(time_str), time_format.c_str(), tm);
 
-	std::string formatted_log = std::string(time_str) + " " + level_str + " " + msg + "\n";
+	std::string formatted_log = std::string(time_str) + " " + level_str + " " + msg;
 	if (use_console_)
 	{
 		if (level >= ERROR)

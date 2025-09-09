@@ -1,4 +1,4 @@
-#include "PassCommand.h"
+#include "commands/PassCommand.h"
 
 namespace Irc {
 /************************************************************

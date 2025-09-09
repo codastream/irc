@@ -1,4 +1,4 @@
-#include "test.h"
+#include "test_utils.h"
 #include "ServerRunner.h"
 #include "colors.h"
 
@@ -77,5 +77,8 @@ int main()
 		std::cerr << e.what() << '\n';
 	}
 
+	testPASS(server);
 
+	server->stop();
+	delete server;
 }

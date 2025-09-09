@@ -1,7 +1,7 @@
 #ifndef PASSCOMMAND_H
 #define PASSCOMMAND_H
 
-#include "ACommand.h"
+#include "commands/ACommand.h"
 #include "Server.h"
 
 #include <string>

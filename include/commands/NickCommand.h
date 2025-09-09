@@ -1,7 +1,7 @@
 #ifndef NICKCOMMAND_H
 #define NICKCOMMAND_H
 
-#include "ACommand.h"
+#include "commands/ACommand.h"
 #include "Server.h"
 
 #include <string>

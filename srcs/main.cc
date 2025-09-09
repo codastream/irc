@@ -19,8 +19,6 @@ namespace Irc {
 			return false;
 		return true;
 	}
-
-
 }
 
 int main(int ac, char** av)

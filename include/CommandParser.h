@@ -1,8 +1,8 @@
 #ifndef MESSAGEPARSER_H
 #define MESSAGEPARSER_H
 
-#include "ACommand.h"
-#include "CommandFactory.h"
+#include "commands/ACommand.h"
+#include "commands/CommandFactory.h"
 #include "IRCException.h"
 
 #include <string>

@@ -1,4 +1,4 @@
-#include "CommandFactory.h"
+#include "commands/CommandFactory.h"
 
 namespace Irc {
 
