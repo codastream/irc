@@ -18,7 +18,7 @@ namespace Irc {
 			instance_ = this;
 	}
 
-	Server::~Server(void) 
+	Server::~Server(void)
 	{
 		delete[] events_;
 		Utils::delete_map(clients_);
@@ -33,10 +33,10 @@ namespace Irc {
 	*		        🛠️ FUNCTIONS								*
 	*************************************************************/
 
-	/// @brief 
-	/// @param fd 
+	/// @brief
+	/// @param fd
 	/// @throw exception if error in fcntl
-	/// @return 
+	/// @return
 	int	Server::set_non_blocking(int fd)
 	{
 		int flags = fcntl(fd, F_GETFL, 0);
@@ -93,11 +93,11 @@ namespace Irc {
 		}
 		Logger::debug(std::string("addr1 = ") + Utils::str(result->ai_addr));
 
-		int server_fd = -1;
+		server_fd_ = -1;
 		for (struct  addrinfo* test = result; test != NULL; test = test->ai_next)
 		{
-			server_fd = socket(test->ai_family, test->ai_socktype, test->ai_protocol);
-			if (server_fd == -1)
+			server_fd_ = socket(test->ai_family, test->ai_socktype, test->ai_protocol);
+			if (server_fd_ == -1)
 				continue;
 			fcntl(server_fd_, F_SETFL, O_NONBLOCK);
 			int yes = 1;
@@ -105,20 +105,20 @@ namespace Irc {
 			if (bind(server_fd_, test->ai_addr, test->ai_addrlen) == 0)
 				break;
 			close(server_fd_);
-			server_fd = -1;
+			server_fd_ = -1;
 		};
 		freeaddrinfo(result);
 
 		if (listen(server_fd_, SOMAXCONN) == -1)
 		{
-			close(server_fd);
+			close(server_fd_);
 			throw IRCException(SERVER_ERR, "listen error");
 		}
 
 		epoll_fd_ = epoll_create1(0);
 		if (epoll_fd_ == -1)
 		{
-			close(server_fd);
+			close(server_fd_);
 			throw IRCException(SERVER_ERR, "epoll create error");
 		}
 		subscribe_to_event_(server_fd_, EPOLLIN);
@@ -126,7 +126,7 @@ namespace Irc {
 		return server_fd_;
 	}
 
-	/// @brief 
+	/// @brief
 	/// @throw IRCException if error from accept
 	void	Server::loop()
 	{
@@ -191,7 +191,7 @@ namespace Irc {
     						this->modify_event_(client_fd, EPOLLIN | EPOLLET);
 					}
 				}
-			}	
+			}
 
 		}
 	}
@@ -226,7 +226,7 @@ namespace Irc {
 		if (it != clients_by_nick_.end())
 			return it->second;
 		return NULL;
-	}	
+	}
 
 	void	Server::update_client_by_nick(Client* client)
 	{
