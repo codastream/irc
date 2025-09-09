@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug IRC Server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/irc",
+            "args": ["6667", "password"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build-debug",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "logging": {
+                "engineLogging": false,
+                "trace": false,
+                "traceResponse": false
+            }
+        },
+        {
+            "name": "Debug IRC Server (Custom Args)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/irc",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "build-debug",
+            "miDebuggerPath": "/usr/bin/gdb",
+            "logging": {
+                "engineLogging": false,
+                "trace": false,
+                "traceResponse": false
+            }
+        },
+    ]
+}
