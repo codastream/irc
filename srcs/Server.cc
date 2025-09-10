@@ -13,7 +13,7 @@ namespace Irc {
 	************************************************************/
 
 	Server::Server(int port, unsigned int hashed_password) : \
-		port_(port), hashed_password_(hashed_password), events_(new epoll_event[QUEUE_SIZE]), clients_(), clients_by_nick_(), client_connections_(), reply_factory_(HOST_NAME) {
+		port_(port), hashed_password_(hashed_password), server_fd_(-1), events_(new epoll_event[QUEUE_SIZE]), clients_(), clients_by_nick_(), client_connections_(), reply_factory_(HOST_NAME) {
 
 			instance_ = this;
 	}
@@ -28,6 +28,13 @@ namespace Irc {
 	/************************************************************
 	*				➕ OPERATORS									*
 	************************************************************/
+	
+	std::ostream&	operator<<(std::ostream& os, Server& s)
+	{
+		return os << "Server [server_fd: " << s.get_server_fd() <<\
+			" epoll_fd: " << s.get_epoll_fd() <<\
+			" port: " << s.get_port() << "]" << std::endl;
+	}
 
 	/*************************************************************
 	*		        🛠️ FUNCTIONS								*
@@ -204,7 +211,6 @@ namespace Irc {
 			close(server_fd_);
 			server_fd_ = -1;
 		}
-		delete Server::instance_;
 	}
 
 	bool	Server::is_valid_password(const std::string& test) const

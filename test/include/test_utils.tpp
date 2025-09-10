@@ -14,9 +14,10 @@ bool assert_throws(Func&& f)
 }
 
 template <typename Func>
-void run_test(Func&& f, const char* file, const char* name)
+void run_test(Func&& f, const char* name)
 {
 	try {
+		prin
 		f();
 		print_success(name);
 	} catch (const std::exception& e) {

@@ -17,6 +17,13 @@ namespace Irc {
 	*		➕ OPERATORS											*
 	************************************************************/
 
+	std::ostream&	operator<<(std::ostream& os, ClientConnection& co)
+	{
+		return os << "Connection [fd: " << co.get_fd() << "\n"\
+			" toWrite: " << co.get_write_buffer() << "\n"\
+			" toRead: " << co.get_read_buffer() << "]" << std::endl;
+	}
+
 	/*************************************************************
 	*		🛠️ FUNCTIONS										*
 	*************************************************************/
@@ -110,11 +117,6 @@ namespace Irc {
 	*		👁️‍ GETTERS and SETTERS				 				*
 	*************************************************************/
 
-	// ReplyFactory& ClientConnection::get_reply_factory() const
-	// {
-	// 	return rf_;
-	// }
-
 	std::string	ClientConnection::get_read_buffer() const
 	{
 		return read_buffer_;
@@ -134,5 +136,6 @@ namespace Irc {
 	{
 		return fd_;
 	}
+
 
 }

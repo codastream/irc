@@ -39,6 +39,7 @@ irc.log
 *.out
 *.app
 irc
+test/test
 
 # debug information files
 *.dwo

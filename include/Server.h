@@ -82,6 +82,8 @@ namespace Irc {
 			void			modify_event_(int fd, uint32_t events);
 
 	};
+
+	std::ostream&	operator<<(std::ostream& os, Server& s);
 }
 
 namespace Utils {
@@ -95,7 +97,6 @@ namespace Utils {
 			{
 				close(it->first);
 			}
-			delete it->second;
 		}
 		map.clear();
 	}

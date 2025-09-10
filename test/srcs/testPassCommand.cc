@@ -9,7 +9,7 @@ void	noPasswordShouldError(Irc::Server* server)
 	int fd = make_client_socket(6667);
 
 	send_line(fd, "PASS\r\n");
-
+	Logger::debug("after send line");
 	std::string	reply = recv_line(fd);
 	ReplyAssert ra(reply);
 	ra.hasCode(Irc::ERR_NEEDMOREPARAMS);
@@ -20,5 +20,6 @@ void	noPasswordShouldError(Irc::Server* server)
 
 void	testPASS(Irc::Server* server)
 {
-	RUN_TEST([&] { noPasswordShouldError(server); });
+	print_test_series("command PASS");
+	run_test([&] { noPasswordShouldError(server); }, "no password");
 }

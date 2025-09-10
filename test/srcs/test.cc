@@ -48,9 +48,14 @@ std::string recv_line(int fd)
 	return std::string(buffer);
 }
 
-void	print_file(const std::string& msg)
+void	print_test_series(const std::string& msg)
 {
-	std::cout << BLUEBACK << msg << NC << std::endl;
+	std::cout << YELLOW << msg << NC << std::endl;
+}
+
+void	print_test_name(const std::string& msg)
+{
+	std::cout << BCYAN << msg << NC << std::endl;
 }
 
 void	print_success(const std::string& test_name)

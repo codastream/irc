@@ -27,12 +27,11 @@ bool assert_throws(Func&& f);
 template <typename Func>
 void run_test(Func&& f, const char* name);
 
-#define RUN_TEST(f) run_test(f, __func__)
-
 int			make_client_socket(int port);
 bool		send_line(int fd, const std::string& msg);
 std::string	recv_line(int fd);
 
+void		print_test_name(const std::string& msg);
 void		print_test_series(const std::string& msg);
 void		print_success(const std::string& test_name);
 void		print_error(const std::string& test_name);

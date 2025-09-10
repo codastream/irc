@@ -63,6 +63,9 @@ $(BUILD_DIR)/%.o: %.cc | $(DIRS)
 	@mkdir -p $(BUILD_DIR)
 	@$(CXX) $(CXXFLAGS) $(INC) $< -c -o $@
 
+debug: CXXFLAGS += -g -DDEB=1
+debug: all
+
 clean:
 	@echo "$(RED)Remove objects$(NOC)"
 	@rm -rf $(BUILD_DIR)
