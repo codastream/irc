@@ -39,8 +39,8 @@ namespace Irc {
 			static const int			MESSAGE_SIZE;
 
 			static void		signals_init();
-			// static Server	get_instance();
-			static Server	get_instance(int port, unsigned int hashed_password); // singleton
+			static Server&	get_instance();
+			static Server&	get_instance(int port, unsigned int hashed_password); // singleton
 			static void		handle_interrupt(int sig);
 			static int		set_non_blocking(int fd);
 			// static bool		can_serve();
@@ -93,14 +93,14 @@ namespace Irc {
 namespace Utils {
 
 	template <typename T>
-	void	delete_map(std::map<int, T*>& map, bool should_close_fd=false)
+	void	delete_clients(std::map<int, T*>& map, bool should_close_fd = false, bool should_close_values = false)
 	{
 		for (typename std::map<int, T*>::iterator it = map.begin(); it != map.end(); ++it)
 		{
 			if (should_close_fd)
-			{
 				close(it->first);
-			}
+			if (should_close_values)
+				delete it->second;
 		}
 		map.clear();
 	}

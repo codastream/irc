@@ -147,8 +147,9 @@ namespace Irc {
 		{
 			Logger::debug("handle interrupting signal");
 			sig_res = SIGINT;
+			Server& s = Server::get_instance();
+			s.stop();
 		}
-		
 	}
 
 	/// @brief initializes a socket on default port and put it in listening mode
@@ -253,12 +254,14 @@ namespace Irc {
 
 	void	Server::stop()
 	{
-		// Server::can_serve_ = false;
 		if (server_fd_ != -1)
 		{
 			close(server_fd_);
 			server_fd_ = -1;
 		}
+		Utils::delete_clients(client_connections_, true, true);
+		Utils::delete_clients(clients_, false, true);
+		clients_by_nick_.clear();
 	}
 
 	bool	Server::is_valid_password(const std::string& test) const
@@ -291,9 +294,15 @@ namespace Irc {
 	*		    👁️‍ GETTERS and SETTERS				 			*
 	*************************************************************/
 
-	Server	Server::get_instance(int port, unsigned int hashed_password)
+	Server& Server::get_instance()
+	{
+		return Server::get_instance(Server::DEFAULT_PORT, simple_hash("password"));
+	}
+
+	Server&	Server::get_instance(int port, unsigned int hashed_password)
 	{
 		static Server instance_(port, hashed_password);
+		Server::has_instance_ = true;
 		return instance_;
 	}
 
