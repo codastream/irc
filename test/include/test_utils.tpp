@@ -17,7 +17,6 @@ template <typename Func>
 void run_test(Func&& f, const char* name)
 {
 	try {
-		prin
 		f();
 		print_success(name);
 	} catch (const std::exception& e) {

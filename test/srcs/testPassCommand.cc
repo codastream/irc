@@ -6,8 +6,8 @@ void	noPasswordShouldError(Irc::Server* server)
 	runner.start();
 
 	ASSERT_TRUE(runner.is_running());
-	int fd = make_client_socket(6667);
-
+	int fd = make_client_socket(Irc::Server::DEFAULT_PORT);
+	Logger::debug(std::string("") + Utils::str(fd));
 	send_line(fd, "PASS\r\n");
 	Logger::debug("after send line");
 	std::string	reply = recv_line(fd);

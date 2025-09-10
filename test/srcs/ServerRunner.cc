@@ -31,6 +31,7 @@ void		ServerRunner::start()
 		} catch (const std::exception& e)
 		{
 			last_error_ = e.what();
+			Logger::error(last_error_);
 		}
 		running_ = false;
 	});
