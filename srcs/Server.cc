@@ -97,7 +97,10 @@ namespace Irc {
 	{
 		Logger::debug("Server#process_read");
 		if (!co->receive())
+		{
 			remove_client(client_fd);
+			return ;
+		}
 		Logger::debug("read buffer", co->get_read_buffer());
 		ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
 		if (cmd)
