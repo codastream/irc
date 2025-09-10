@@ -42,17 +42,18 @@ namespace Irc {
 
 		while (true)
 		{
-			errno = 0;
 			ssize_t nb_read = recv(fd_, buffer, sizeof(buffer), 0);
 			if (nb_read > 0)
 				read_buffer_.append(buffer, nb_read);
 			else if (nb_read == 0)
+			{
+				Logger::debug(std::string("client gracefully disconnected"));
 				return false;
+			}
 			else
 			{
-				if (errno == EAGAIN || errno == EWOULDBLOCK) // saturated socket
-					break ;
-				throw IRCException(SERVER_ERR);
+				Logger::error("recv error");
+				return false;
 			}
 		}
 		return true;
@@ -64,13 +65,10 @@ namespace Irc {
 	{
 		while (!write_buffer_.empty())
 		{
-			errno = 0;
 			ssize_t nb_sent = send(fd_, write_buffer_.c_str(), write_buffer_.size(), 0);	
 			if (nb_sent == -1)
 			{
-				if (errno == EAGAIN || errno == EWOULDBLOCK) // saturated socket
-					return true;
-				throw IRCException(SERVER_ERR);
+				Logger::error("send error");
 			}
 			write_buffer_.erase(0, nb_sent);
 		}

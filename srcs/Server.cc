@@ -2,8 +2,10 @@
 
 namespace Irc {
 
+	sig_atomic_t	sig_res = 0;
+
 	Server* 		Server::instance_ = NULL;
-	bool			Server::can_serve_ = false;
+	// bool			Server::can_serve_ = false;
 	const int		Server::DEFAULT_PORT = 6667;
 	const int		Server::DEFAULT_PORT_TLS = 6697;
 	const int		Server::QUEUE_SIZE = 64;
@@ -37,8 +39,82 @@ namespace Irc {
 	}
 
 	/*************************************************************
+	*		        🛠️ CLASS FUNCTIONS							*
+	*************************************************************/
+
+	void		Server::signals_init(void)
+	{
+		struct sigaction	mode;
+
+		mode.sa_handler = &Server::handle_interrupt;
+		sigemptyset(&mode.sa_mask);
+		mode.sa_flags = 0;
+		sigaction(SIGINT, &mode, NULL);
+	}
+
+	/*************************************************************
 	*		        🛠️ FUNCTIONS								*
 	*************************************************************/
+
+	void	Server::accept_client()
+	{
+		int client_fd = accept(server_fd_, NULL, NULL);
+		if (client_fd == -1)
+		{
+			Logger::error(std::string("accept error"));
+		}
+		Client* c = new Client(client_fd);
+		clients_.insert(std::make_pair(client_fd, c));
+
+		ClientConnection* co = new ClientConnection(client_fd);
+		client_connections_.insert(std::make_pair(client_fd, co));
+		// Server::set_non_blocking(client_fd);
+		subscribe_to_event_(client_fd, EPOLLIN | EPOLLET);
+	}
+
+	void	Server::remove_client(int fd)
+	{		
+		Logger::info(std::string("removing client with fd ") + Utils::str(fd));
+		epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, NULL);
+		Client* c = Server::get_client_by_fd(fd);
+		std::string nick = c->get_nick();
+		close(fd);
+		delete c;
+		clients_.erase(fd);
+		clients_by_nick_.erase(nick);
+
+		std::map<int, ClientConnection*>::iterator it = client_connections_.find(fd);
+		delete it->second;
+		client_connections_.erase(fd);
+	}
+
+	// what if Client send 2 cmds then disconnects - should we delete him that quickly ?
+	void	Server::process_read(int client_fd, ClientConnection* co)
+	{
+		if (!co->receive())
+			remove_client(client_fd);
+		ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
+		if (cmd)
+		{
+			cmd->execute(*this, *co);
+			delete cmd;
+		}
+		if (co->has_pending_write())
+		{
+			this->modify_event_(client_fd, EPOLLIN | EPOLLOUT);
+		}
+	}
+
+	void	Server::process_write(int client_fd, ClientConnection* co)
+	{
+		if (!co->send_queue())
+		{
+			close(client_fd);
+			client_connections_.erase(client_fd);
+		}
+		if (!co->has_pending_write())
+			this->modify_event_(client_fd, EPOLLIN | EPOLLET);
+	}
 
 	/// @brief
 	/// @param fd
@@ -70,11 +146,11 @@ namespace Irc {
 
 	void	Server::handle_interrupt(int sig)
 	{
-		if (sig == SIGINT || sig == SIGTSTP)
+		if (sig == SIGINT)
 		{
 			Logger::debug("handle interrupting signal");
-			Server::can_serve_ = false;
-			delete Server::get_instance();
+			sig_res = SIGINT;
+			// Server::can_serve_ = false;
 		}
 	}
 
@@ -91,6 +167,7 @@ namespace Irc {
 		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;
 
+		signals_init();
 		Logger::debug(std::string("port = ") + port_str);
 		int status = getaddrinfo(HOST_NAME.c_str(), port_str.c_str(), &hints, &result);
 		if (status != 0)
@@ -129,7 +206,7 @@ namespace Irc {
 			throw IRCException(SERVER_ERR, "epoll create error");
 		}
 		subscribe_to_event_(server_fd_, EPOLLIN);
-		Server::can_serve_ = true;
+		// Server::can_serve_ = true;
 		return server_fd_;
 	}
 
@@ -137,66 +214,39 @@ namespace Irc {
 	/// @throw IRCException if error from accept
 	void	Server::loop()
 	{
-		while (Server::can_serve())
+		int 				client_fd;
+		struct	epoll_event	ev;
+
+		while (sig_res == 0)
 		{
 			int n = epoll_wait(this->get_epoll_fd(), events_, Server::QUEUE_SIZE, -1);
 			Logger::debug(std::string("nb of events: ") + Utils::str(n));
 
 			if (n == -1)
 			{
+				Logger::error("epoll wait error");
 				this->stop();
 			}
 			for (int i = 0; i < n; ++i)
 			{
-				if (events_[i].data.fd == this->get_server_fd())
-				{
-					int client_fd = accept(this->get_server_fd(), NULL, NULL);
-					if (client_fd == -1)
-						throw IRCException(SERVER_ERR, "accept error");
-					Client* c = new Client(client_fd);
-					ClientConnection* co = new ClientConnection(client_fd);
-					clients_.insert(std::make_pair(client_fd, c));
-					client_connections_.insert(std::make_pair(client_fd, co));
-					Server::set_non_blocking(client_fd);
-					this->subscribe_to_event_(client_fd, EPOLLIN | EPOLLET);
-				}
+				ev = events_[i];
+				if (ev.data.fd == this->get_server_fd())
+					accept_client();
 				else
 				{
-					int client_fd = events_[i].data.fd;
-					ClientConnection* co = client_connections_.at(client_fd); // TODO check that clientConnection exists
-
-					if (events_[i].events & EPOLLIN)
+					client_fd = ev.data.fd;
+					ClientConnection* co = client_connections_[client_fd];
+				
+					if (ev.data.fd & EPOLLIN)
 					{
-						if (!co->receive())
-						{
-							Logger::error(std::string("receive error on fd " + Utils::str(co->get_fd())));
-							close(client_fd);
-							client_connections_.erase(client_fd);
-							continue ;
-						}
-						ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
-						if (cmd)
-						{
-							cmd->execute(*this, *co);
-							delete cmd;
-						}
-						if (co->has_pending_write())
-						{
-							this->modify_event_(client_fd, EPOLLIN | EPOLLOUT);
-						}
+						process_read(client_fd, co);
 					}
-
-					if (events_[i].events & EPOLLOUT)
+					if (ev.events & EPOLLOUT)
 					{
-						if (!co->send_queue())
-						{
-							close(client_fd);
-							client_connections_.erase(client_fd);
-							continue ;
-						}
-						if (!co->has_pending_write())
-    						this->modify_event_(client_fd, EPOLLIN | EPOLLET);
+						process_write(client_fd, co);
 					}
+					if ((ev.events & EPOLLHUP) || (ev.events & EPOLLERR))
+						remove_client(ev.data.fd);
 				}
 			}
 
@@ -205,7 +255,7 @@ namespace Irc {
 
 	void	Server::stop()
 	{
-		Server::can_serve_ = false;
+		// Server::can_serve_ = false;
 		if (server_fd_ != -1)
 		{
 			close(server_fd_);
@@ -262,10 +312,10 @@ namespace Irc {
 		return reply_factory_;
 	}
 
-	bool	Server::can_serve()
-	{
-		return Server::can_serve_;
-	}
+	// bool	Server::can_serve()
+	// {
+	// 	return Server::can_serve_;
+	// }
 
 	int	Server::get_port() const
 	{

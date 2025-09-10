@@ -27,7 +27,6 @@
 #include <unistd.h>					// close
 
 #define DEBUG 0
-
 namespace Irc {
 
 	class Server {
@@ -39,12 +38,17 @@ namespace Irc {
 			static const int			QUEUE_SIZE;
 			static const int			MESSAGE_SIZE;
 
+			static void		signals_init();
 			static Server*	get_instance();
 			static Server*	get_instance(int port, unsigned int hashed_password); // singleton
 			static void		handle_interrupt(int sig);
 			static int		set_non_blocking(int fd);
-			static bool		can_serve();
+			// static bool		can_serve();
 		
+			void			accept_client(void);
+			void			process_read(int fd, ClientConnection* co);
+			void			process_write(int fd, ClientConnection* co);
+			void			remove_client(int fd);
 			Client*			get_client_by_fd(int client_fd);
 			Client*			get_client_by_nick(const std::string& nick);
 			void			update_client_by_nick(Client* client);
@@ -62,7 +66,7 @@ namespace Irc {
 
 		private:
 			
-			static bool							can_serve_;
+			// static bool							can_serve_;
 			static Server*						instance_;
 
 			int									port_;

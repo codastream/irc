@@ -3,6 +3,7 @@
 
 #include "IRCException.h"
 #include "ReplyFactory.h"
+#include "Logger.h"
 
 #include "reply_codes.h"
 #include "config.h"
@@ -47,6 +48,7 @@ namespace Irc {
 			ReplyFactory	rf_;
 	};
 
+	std::ostream&	operator<<(std::ostream& os, ClientConnection& co);
 }
 
 #endif

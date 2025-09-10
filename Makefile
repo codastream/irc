@@ -86,7 +86,7 @@ clean:
 	@echo "$(RED)Remove objects$(NOC)"
 	@rm -rf $(BUILD_DIR)
 
-debug: CXXFLAGS += -g -DDEBUG=1
+debug: CXXFLAGS += -g -DDEB=1
 debug: clean all
 
 lint:
