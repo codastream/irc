@@ -45,7 +45,7 @@ namespace Irc {
 			static int		set_non_blocking(int fd);
 			// static bool		can_serve();
 		
-			void			accept_client(void);
+			void			accept_clients(void);
 			void			process_read(int fd, ClientConnection* co);
 			void			process_write(int fd, ClientConnection* co);
 			void			remove_client(int fd);

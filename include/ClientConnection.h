@@ -47,8 +47,9 @@ namespace Irc {
 			bool			has_pending_write_;
 			ReplyFactory	rf_;
 	};
-
-	std::ostream&	operator<<(std::ostream& os, ClientConnection& co);
+	std::ostream&	operator<<(std::ostream& os, const ClientConnection& co);
 }
+
+
 
 #endif

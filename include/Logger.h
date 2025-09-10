@@ -11,44 +11,46 @@
 #include <string>
 #include <ctime>
 
-enum LogLevel {
-	DEBUG,
-	INFO,
-	ERROR
-};
+namespace Irc {
 
-class Logger {
-	public:
-		virtual ~Logger();
-		Logger(const Logger& other);
-		Logger& operator=(const Logger& other);
-	
-		template<typename T>
-		static void debug(const std::string& msg, const T& obj)
-		{
-			std::ostringstream oss;
-			oss << msg;
-			oss << " ";
-			oss << obj;
-			Logger::get_instance_().log_(DEBUG, oss.str());
-		}
+	enum LogLevel {
+		DEBUG,
+		INFO,
+		ERROR
+	};
 
-		static void	debug(const std::string& msg);
-		static void	info(const std::string& msg);
-		static void	error(const std::string& msg);
-		static void ex(const std::string& msg, Irc::ReplyCode code);
+	class Logger {
+		public:
+			virtual ~Logger();
+			Logger(const Logger& other);
+			Logger& operator=(const Logger& other);
+		
+			template<typename T>
+			static void debug(const std::string& msg, const T& obj)
+			{
+				std::ostringstream oss;
+				oss << msg;
+				oss << " ";
+				oss << obj;
+				Logger::get_instance_().log_(DEBUG, oss.str());
+			}
 
-	private:
-		static const char*			LOG_FILENAME;
-		std::ofstream				log_file_;
-		LogLevel					current_log_level_;
-		bool						use_console_;
+			static void	debug(const std::string& msg);
+			static void	info(const std::string& msg);
+			static void	error(const std::string& msg);
+			static void ex(const std::string& msg, Irc::ReplyCode code);
 
-		Logger(bool use_console);
+		private:
+			static const char*			LOG_FILENAME;
+			std::ofstream				log_file_;
+			LogLevel					current_log_level_;
+			bool						use_console_;
 
-		static Logger&	get_instance_();
-		void			log_(LogLevel level, const std::string& msg);
-};
+			Logger(bool use_console);
 
+			static Logger&	get_instance_();
+			void			log_(LogLevel level, const std::string& msg);
+	};
+}
 
 #endif

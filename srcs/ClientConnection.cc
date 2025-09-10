@@ -17,11 +17,11 @@ namespace Irc {
 	*		➕ OPERATORS											*
 	************************************************************/
 
-	std::ostream&	operator<<(std::ostream& os, ClientConnection& co)
+	std::ostream&	operator<<(std::ostream& os, const ClientConnection& co)
 	{
-		return os << "Connection [fd: " << co.get_fd() << "\n"\
-			" toWrite: " << co.get_write_buffer() << "\n"\
-			" toRead: " << co.get_read_buffer() << "]" << std::endl;
+		return os << "Connection [fd: " << co.get_fd() << \
+			" toWrite: " << co.get_write_buffer().size() << \
+			" toRead: " << co.get_read_buffer().size() << "]" << std::endl;
 	}
 
 	/*************************************************************
@@ -43,7 +43,8 @@ namespace Irc {
 		while (true)
 		{
 			ssize_t nb_read = recv(fd_, buffer, sizeof(buffer), 0);
-			Logger::debug("ClientConnection#receive - buffer = ", buffer);
+			Logger::debug("ClientConnection#receive from fd = ", fd_);
+			Logger::debug("ClientConnection#receive nb read = ", nb_read);
 			if (nb_read > 0)
 				read_buffer_.append(buffer, nb_read);
 			else if (nb_read == 0)
@@ -53,8 +54,10 @@ namespace Irc {
 			}
 			else
 			{
-				Logger::error("recv error");
-				return false;
+				Logger::error("end of receive");
+				if (read_buffer_.empty())
+					return false;
+				return true;
 			}
 		}
 		return true;
@@ -135,6 +138,4 @@ namespace Irc {
 	{
 		return fd_;
 	}
-
-
 }

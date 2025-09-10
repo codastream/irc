@@ -51,20 +51,29 @@ namespace Irc {
 	*		        🛠️ FUNCTIONS								*
 	*************************************************************/
 
-	void	Server::accept_client()
+	void	Server::accept_clients()
 	{
 		int client_fd = accept(server_fd_, NULL, NULL);
 		if (client_fd == -1)
 		{
 			Logger::error(std::string("accept error"));
 		}
-		Client* c = new Client(client_fd);
-		clients_.insert(std::make_pair(client_fd, c));
+		while (client_fd != -1)
+		{
+			Logger::info(std::string("registering new client with fd ") + Utils::str(client_fd));
+			Client* c = new Client(client_fd);
+			clients_.insert(std::make_pair(client_fd, c));
 
-		ClientConnection* co = new ClientConnection(client_fd);
-		client_connections_.insert(std::make_pair(client_fd, co));
-		// Server::set_non_blocking(client_fd);
-		subscribe_to_event_(client_fd, EPOLLIN | EPOLLET);
+			ClientConnection* co = new ClientConnection(client_fd);
+			client_connections_.insert(std::make_pair(client_fd, co));
+			Server::set_non_blocking(client_fd);
+			subscribe_to_event_(client_fd, EPOLLIN | EPOLLET);
+			client_fd = accept(server_fd_, NULL, NULL);
+			if (client_fd == -1)
+			{
+				Logger::debug(std::string("no more clients to accept"));
+			}
+		}
 	}
 
 	void	Server::remove_client(int fd)
@@ -89,6 +98,7 @@ namespace Irc {
 		Logger::debug("Server#process_read");
 		if (!co->receive())
 			remove_client(client_fd);
+		Logger::debug("read buffer", co->get_read_buffer());
 		ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
 		if (cmd)
 		{
@@ -104,6 +114,7 @@ namespace Irc {
 	void	Server::process_write(int client_fd, ClientConnection* co)
 	{
 		Logger::debug("Server#process_write");
+		Logger::debug("write buffer", co->get_write_buffer());
 		if (!co->send_queue())
 		{
 			close(client_fd);
@@ -230,13 +241,14 @@ namespace Irc {
 			{
 				ev = events[i];
 				if (ev.data.fd == server_fd_)
-					accept_client();
+					accept_clients();
 				else
 				{
 					client_fd = ev.data.fd;
+					Logger::debug("processing client event for fd ", client_fd);
 					ClientConnection* co = client_connections_[client_fd];
-				
-					if (ev.data.fd & EPOLLIN)
+					Logger::debug("found connection ", *co);
+					if (ev.events & EPOLLIN)
 					{
 						process_read(client_fd, co);
 					}
