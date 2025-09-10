@@ -43,6 +43,7 @@ namespace Irc {
 		while (true)
 		{
 			ssize_t nb_read = recv(fd_, buffer, sizeof(buffer), 0);
+			Logger::debug("ClientConnection#receive - buffer = ", buffer);
 			if (nb_read > 0)
 				read_buffer_.append(buffer, nb_read);
 			else if (nb_read == 0)

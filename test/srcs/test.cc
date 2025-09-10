@@ -72,18 +72,16 @@ void	print_error(const std::string& test_name)
 
 int main()
 {
-	Irc::Server* server;
 	try
 	{
-		server = Irc::Server::get_instance(6667, Irc::simple_hash("password"));
+		Irc::Server server = Irc::Server::get_instance(6667, Irc::simple_hash("password"));
+		testPASS(&server);
+		server.stop();
 	}
 	catch(const std::exception& e)
 	{
 		std::cerr << e.what() << '\n';
 	}
 
-	testPASS(server);
 
-	server->stop();
-	delete server;
 }

@@ -39,8 +39,8 @@ namespace Irc {
 			static const int			MESSAGE_SIZE;
 
 			static void		signals_init();
-			static Server*	get_instance();
-			static Server*	get_instance(int port, unsigned int hashed_password); // singleton
+			// static Server	get_instance();
+			static Server	get_instance(int port, unsigned int hashed_password); // singleton
 			static void		handle_interrupt(int sig);
 			static int		set_non_blocking(int fd);
 			// static bool		can_serve();
@@ -57,7 +57,7 @@ namespace Irc {
 			int				get_port() const;
 			int				get_epoll_fd() const;
 			int				get_server_fd() const;
-			epoll_event*	get_events() const;
+			// epoll_event*	get_events() const;
 	
 			int 			start();
 			void			loop();
@@ -66,14 +66,14 @@ namespace Irc {
 
 		private:
 			
-			// static bool							can_serve_;
-			static Server*						instance_;
+			// static bool						can_serve_;
+			static bool							has_instance_;
 
 			int									port_;
 			unsigned int						hashed_password_;
 			int									server_fd_;
 			int									epoll_fd_;
-			epoll_event*						events_;
+			// epoll_event*						events_;
 			std::map<int, Client*> 				clients_;
 			std::map<std::string, Client*> 		clients_by_nick_;
 			std::map<int, ClientConnection*> 	client_connections_;

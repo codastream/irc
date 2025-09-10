@@ -22,7 +22,17 @@ class Logger {
 		virtual ~Logger();
 		Logger(const Logger& other);
 		Logger& operator=(const Logger& other);
-		
+	
+		template<typename T>
+		static void debug(const std::string& msg, const T& obj)
+		{
+			std::ostringstream oss;
+			oss << msg;
+			oss << " ";
+			oss << obj;
+			Logger::get_instance_().log_(DEBUG, oss.str());
+		}
+
 		static void	debug(const std::string& msg);
 		static void	info(const std::string& msg);
 		static void	error(const std::string& msg);

@@ -28,14 +28,14 @@ int main(int ac, char** av)
 
 	if (!Irc::check_args(ac, av, &port, &hashed))
 		return EXIT_FAILURE;
-	Irc::Server* s = Irc::Server::get_instance(port, hashed);
+	Irc::Server s = Irc::Server::get_instance(port, hashed);
 	signal(SIGINT, Irc::Server::handle_interrupt);
 	signal(SIGTSTP, Irc::Server::handle_interrupt);
 	
 	try
 	{
-		s->start();
-		s->loop();
+		s.start();
+		s.loop();
 	}
 	catch(const std::exception& e)
 	{

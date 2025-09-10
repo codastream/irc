@@ -4,7 +4,7 @@ namespace Irc {
 
 	sig_atomic_t	sig_res = 0;
 
-	Server* 		Server::instance_ = NULL;
+	bool 			Server::has_instance_ = false;
 	// bool			Server::can_serve_ = false;
 	const int		Server::DEFAULT_PORT = 6667;
 	const int		Server::DEFAULT_PORT_TLS = 6697;
@@ -15,16 +15,11 @@ namespace Irc {
 	************************************************************/
 
 	Server::Server(int port, unsigned int hashed_password) : \
-		port_(port), hashed_password_(hashed_password), server_fd_(-1), events_(new epoll_event[QUEUE_SIZE]), clients_(), clients_by_nick_(), client_connections_(), reply_factory_(HOST_NAME) {
-
-			instance_ = this;
-	}
+		port_(port), hashed_password_(hashed_password), server_fd_(-1), clients_(), clients_by_nick_(), client_connections_(), reply_factory_(HOST_NAME) {}
 
 	Server::~Server(void)
 	{
-		delete[] events_;
-		Utils::delete_map(clients_);
-		Utils::delete_map(client_connections_, true);
+		close(epoll_fd_);
 	}
 
 	/************************************************************
@@ -91,6 +86,7 @@ namespace Irc {
 	// what if Client send 2 cmds then disconnects - should we delete him that quickly ?
 	void	Server::process_read(int client_fd, ClientConnection* co)
 	{
+		Logger::debug("Server#process_read");
 		if (!co->receive())
 			remove_client(client_fd);
 		ACommand* cmd = CommandParser::parseCommand(co->get_read_buffer());
@@ -101,19 +97,20 @@ namespace Irc {
 		}
 		if (co->has_pending_write())
 		{
-			this->modify_event_(client_fd, EPOLLIN | EPOLLOUT);
+			modify_event_(client_fd, EPOLLIN | EPOLLOUT);
 		}
 	}
 
 	void	Server::process_write(int client_fd, ClientConnection* co)
 	{
+		Logger::debug("Server#process_write");
 		if (!co->send_queue())
 		{
 			close(client_fd);
 			client_connections_.erase(client_fd);
 		}
 		if (!co->has_pending_write())
-			this->modify_event_(client_fd, EPOLLIN | EPOLLET);
+			modify_event_(client_fd, EPOLLIN | EPOLLET);
 	}
 
 	/// @brief
@@ -150,8 +147,8 @@ namespace Irc {
 		{
 			Logger::debug("handle interrupting signal");
 			sig_res = SIGINT;
-			// Server::can_serve_ = false;
 		}
+		
 	}
 
 	/// @brief initializes a socket on default port and put it in listening mode
@@ -216,21 +213,22 @@ namespace Irc {
 	{
 		int 				client_fd;
 		struct	epoll_event	ev;
+		epoll_event events[QUEUE_SIZE];
 
 		while (sig_res == 0)
 		{
-			int n = epoll_wait(this->get_epoll_fd(), events_, Server::QUEUE_SIZE, -1);
+			int n = epoll_wait(epoll_fd_, events, Server::QUEUE_SIZE, -1);
 			Logger::debug(std::string("nb of events: ") + Utils::str(n));
 
 			if (n == -1)
 			{
 				Logger::error("epoll wait error");
-				this->stop();
+				stop();
 			}
 			for (int i = 0; i < n; ++i)
 			{
-				ev = events_[i];
-				if (ev.data.fd == this->get_server_fd())
+				ev = events[i];
+				if (ev.data.fd == server_fd_)
 					accept_client();
 				else
 				{
@@ -293,17 +291,9 @@ namespace Irc {
 	*		    👁️‍ GETTERS and SETTERS				 			*
 	*************************************************************/
 
-	Server*	Server::get_instance()
+	Server	Server::get_instance(int port, unsigned int hashed_password)
 	{
-		return instance_;
-	}
-
-	Server*	Server::get_instance(int port, unsigned int hashed_password)
-	{
-		if (!Server::instance_)
-		{
-			instance_ = new Server(port, hashed_password);
-		}
+		static Server instance_(port, hashed_password);
 		return instance_;
 	}
 
@@ -332,9 +322,9 @@ namespace Irc {
 		return server_fd_;
 	}
 
-	epoll_event*	Server::get_events() const
-	{
-		return events_;
-	}
+	// epoll_event*	Server::get_events() const
+	// {
+	// 	return events_;
+	// }
 
 }
